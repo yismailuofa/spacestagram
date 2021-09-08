@@ -1,25 +1,62 @@
-import logo from './logo.svg';
-import './App.css';
+import Card from "./Card";
+import sync from "./sync.svg";
+import { useState, useEffect } from "react";
 
-function App() {
+const url =
+  "https://api.nasa.gov/planetary/apod?api_key=xWJxKjotdEwcK3nOgfgEBYZmhT5EtrfBQnYOKDQp&count=5";
+
+const getTracks = async () => {
+  const resp = await fetch(url);
+  const data = await resp.json();
+  return data;
+};
+
+export default function App() {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const handleGetTracks = () => {
+    setLoading(true);
+    getTracks().then((images) => {
+      setImages((curr) => [...curr, ...images]);
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    handleGetTracks();
+    // eslint-disable-next-line
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <div id="stars"></div>
+      <div id="stars2"></div>
+      <div id="stars3"></div>
+      <div className="container">
+        <h1>spacestagram</h1>
+        <div className="cardFlex">
+          {images.length > 0 &&
+            images.map(
+              (img) =>
+                img.media_type === "image" && (
+                  <Card
+                    title={img.title}
+                    date={img.date}
+                    url={img.url}
+                    key={img.title}
+                  />
+                )
+            )}
+          {loading && <div className="load">Loading...</div>}
+        </div>
+        <img
+          src={sync}
+          alt="load more"
+          className="sync"
+          onClick={handleGetTracks}
+        ></img>
+      </div>
+    </>
   );
 }
-
-export default App;
